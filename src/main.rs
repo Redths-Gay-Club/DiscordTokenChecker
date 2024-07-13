@@ -1,9 +1,7 @@
-use std::{
-    env, fs, vec 
-};
+use std::{env, fs, vec};
 
-use tokio::task::JoinHandle;
 use futures::future::join_all;
+use tokio::task::JoinHandle;
 #[tokio::main]
 async fn main() {
     let mut tasks: Vec<JoinHandle<()>> = vec![];
@@ -11,13 +9,15 @@ async fn main() {
     let client = reqwest::Client::new();
     let tokenlist = args.get(1).unwrap();
     let tokens = fs::read_to_string(tokenlist.trim()).unwrap();
-   
+
     for token in tokens.split("\n") {
-            let token = token.trim();
-            tasks.push(tokio::spawn(check_token(client.clone(), String::from(token))));
+        let token = token.trim();
+        tasks.push(tokio::spawn(check_token(
+            client.clone(),
+            String::from(token),
+        )));
     }
     join_all(tasks).await;
-    
 }
 async fn check_token(client: reqwest::Client, token: String) {
     let resp = client
