@@ -1,15 +1,12 @@
 use std::{
-    fs,
-    io::{self, Write},
+    env, fs, 
 };
 
 #[tokio::main]
 async fn main() {
+    let args: Vec<String> = env::args().collect();
     let client = reqwest::Client::new();
-    let mut tokenlist = String::new();
-    print!("Tokens list: ");
-    io::stdout().flush().unwrap();
-    io::stdin().read_line(&mut tokenlist).unwrap();
+    let tokenlist = args.get(1).unwrap();
     let tokens = fs::read_to_string(tokenlist.trim()).unwrap();
     loop {
         for token in tokens.split("\n") {
