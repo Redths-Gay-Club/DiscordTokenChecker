@@ -1,19 +1,23 @@
 use std::{
-    env, fs, 
+    env, fs, vec 
 };
 
+use tokio::task::JoinHandle;
+use futures::future::join_all;
 #[tokio::main]
 async fn main() {
+    let mut tasks: Vec<JoinHandle<()>> = vec![];
     let args: Vec<String> = env::args().collect();
     let client = reqwest::Client::new();
     let tokenlist = args.get(1).unwrap();
     let tokens = fs::read_to_string(tokenlist.trim()).unwrap();
-    loop {
-        for token in tokens.split("\n") {
+   
+    for token in tokens.split("\n") {
             let token = token.trim();
-            tokio::spawn(check_token(client.clone(), String::from(token)));
-        }
+            tasks.push(tokio::spawn(check_token(client.clone(), String::from(token))));
     }
+    join_all(tasks).await;
+    
 }
 async fn check_token(client: reqwest::Client, token: String) {
     let resp = client
