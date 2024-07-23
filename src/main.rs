@@ -1,12 +1,12 @@
 use std::{env, fs, vec};
-
+use std::sync::Arc;
 use futures::future::join_all;
 use tokio::task::JoinHandle;
 #[tokio::main]
 async fn main() {
     let mut tasks: Vec<JoinHandle<()>> = vec![];
     let args: Vec<String> = env::args().collect();
-    let client = reqwest::Client::new();
+    let client = Arc::new(reqwest::Client::new());
     let tokenlist = args.get(1).unwrap();
     let tokens = fs::read_to_string(tokenlist.trim()).unwrap();
 
@@ -19,7 +19,7 @@ async fn main() {
     }
     join_all(tasks).await;
 }
-async fn check_token(client: reqwest::Client, token: String) {
+async fn check_token(client: Arc<reqwest::Client>, token: String) {
     let resp = client
         .get("https://discord.com/api/v9/users/@me")
         .header("Authorization", &token)
